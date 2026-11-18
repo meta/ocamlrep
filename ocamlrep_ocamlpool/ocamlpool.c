@@ -18,6 +18,10 @@
 #include <caml/misc.h>
 #include <caml/shared_heap.h>
 
+#if OCAML_VERSION >= 50500
+#include <caml/major_gc.h>
+#endif
+
 /* Global state
  * ===========================================================================
  */
@@ -121,7 +125,11 @@ value ocamlpool_reserve_block(tag_t tag, mlsize_t wosize) {
       0 /* not pinned*/
 #endif
   );
+#if OCAML_VERSION >= 50500
+  caml_update_major_allocated_words(d, Whsize_wosize(wosize), 1 /* direct */);
+#else
   d->allocated_words += Whsize_wosize(wosize);
+#endif
 
   if (p == NULL) {
     /* TODO: handle this case... */

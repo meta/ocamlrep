@@ -21,14 +21,17 @@ let assert_eq v =
     Printf.printf
       "OCaml Marshal output does not match Rust ocamlrep_marshal output:\n%!";
     Printf.printf "ocaml:\t%S\n%!" ocaml_marshaled;
-    Printf.printf "rust:\t%S\n%!" rust_marshaled
+    Printf.printf "rust:\t%S\n%!" rust_marshaled;
+    failwith "Marshal output mismatch"
   end
 
 let test_round_trip show (x : 'a) =
   let bytes = Ocamlrep_marshal_ffi.to_string x [] in
   let y : 'a = Ocamlrep_marshal_ffi.from_string bytes 0 in
   let _ = Printf.printf "y = %s\n" (show y) in
-  assert (x = y)
+  assert (x = y);
+  assert (x = Marshal.from_string bytes 0);
+  assert (x = Ocamlrep_marshal_ffi.from_string (Marshal.to_string x []) 0)
 
 let show_pair_int_int (x, y) = Printf.sprintf "(%d, %d)" x y
 
@@ -116,6 +119,7 @@ let () =
   assert_eq (3, 3);
   assert_eq "a";
   assert_eq (Some 42, "foo");
+  assert_eq (Array.make 8 42);
 
   test_round_trip (fun c -> String.make 1 c) 'c';
   test_round_trip string_of_float 3.14;
@@ -126,6 +130,7 @@ let () =
   test_round_trip show_pair_opt_int_string (Some 42, "foo");
   test_round_trip show_float_array (Array.make 3 3.14);
   test_round_trip show_float_array (Array.make 3 (-3.14));
+  test_round_trip (fun xs -> string_of_int (Array.length xs)) (Array.make 8 42);
   test_round_trip show_tree tree;
 
   test_sharing ();
