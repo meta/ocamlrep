@@ -15,7 +15,7 @@ rust_library(
     deps = [
         "fbsource//third-party/rust:bstr",
         "fbsource//third-party/rust:hex",
-        "fbsource//third-party/rust:md-5",
+        "fbsource//third-party/rust:md-5-0-10",
         "fbsource//third-party/rust:regex",
         "fbsource//third-party/rust:thiserror",
     ],
